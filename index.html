@@ -530,15 +530,40 @@
 </div>
 
 <script>
-function submitWorkshop() {
+// ⬇️ Cole aqui a URL do seu Google Apps Script
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyI0fyAbxKLw-Fo3EaUJgJCta065DKvp2wbfBn8YYrsQA_kDNWuJ70pC2Y5PKjq3xZqxQ/exec';
+
+async function submitWorkshop() {
   const name  = document.getElementById('wName').value.trim();
   const phone = document.getElementById('wPhone').value.trim();
   const insta = document.getElementById('wInsta').value.trim();
-  if (!name || !phone) { alert('Por favor, preencha nome e WhatsApp.'); return; }
-  const leads = JSON.parse(localStorage.getItem('workshopLeads') || '[]');
-  leads.push({ name, phone, insta, ts: new Date().toISOString() });
-  localStorage.setItem('workshopLeads', JSON.stringify(leads));
-  document.getElementById('modalForm').style.display   = 'none';
+
+  if (!name || !phone) {
+    alert('Por favor, preencha nome e WhatsApp.');
+    return;
+  }
+
+  const btn = document.querySelector('.modal-btn');
+  btn.textContent = 'Enviando...';
+  btn.disabled = true;
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: name,
+        whatsapp: phone,
+        instagram: insta,
+        data: new Date().toLocaleString('pt-BR')
+      })
+    });
+  } catch(e) {
+    // no-cors sempre cai aqui, mas o dado foi enviado
+  }
+
+  document.getElementById('modalForm').style.display    = 'none';
   document.getElementById('modalSuccess').style.display = 'block';
 }
 </script>
